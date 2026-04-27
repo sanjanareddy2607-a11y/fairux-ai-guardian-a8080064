@@ -2,18 +2,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ShieldCheck, Sparkles, Zap, Eye, AlertTriangle, ArrowRight, Play,
-  Activity, Lock, Globe2, CheckCircle2, TrendingUp, Brain,
+  Activity, Lock, Globe2, CheckCircle2, TrendingUp, Brain, Quote,
+  GitBranch, Rocket, Calendar, Users, Star, ChevronDown, Code2, Bell,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ParticleField } from "@/components/particle-field";
+import { TrustTrend } from "@/components/trust-trend";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FairUX AI — Detect Dark Patterns Before They Harm Users" },
-      { name: "description", content: "AI-powered UX auditing for ethical products. Scan websites with Gemini AI to detect dark patterns and manipulative flows." },
-      { property: "og:title", content: "FairUX AI — Ethical UX Auditing" },
-      { property: "og:description", content: "Scan websites and screenshots with AI to detect dark patterns instantly." },
+      { title: "FairUX AI — The Ethical UX Auditor for Modern Product Teams" },
+      { name: "description", content: "FairUX AI uses Google Gemini to detect dark patterns, manipulative UX, and deceptive flows. Audit any website or screenshot in seconds." },
+      { property: "og:title", content: "FairUX AI — Ethical UX Auditing, Powered by Gemini" },
+      { property: "og:description", content: "Detect dark patterns before they harm your users. Built for product teams that ship with integrity." },
     ],
   }),
   component: Landing,
@@ -41,72 +44,89 @@ function Landing() {
     <div className="min-h-screen">
       <SiteHeader />
       <Hero />
+      <Marquee />
       <LiveMetrics />
       <Features />
       <DashboardPreview />
       <DarkPatternGrid />
+      <Roadmap />
       <Testimonials />
+      <FAQ />
       <CTA />
       <SiteFooter />
     </div>
   );
 }
 
+/* ────────────────────────────── Hero ────────────────────────────── */
+
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-mesh opacity-80 pointer-events-none" />
-      <div className="absolute inset-0 bg-grid opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 aurora opacity-70 pointer-events-none" />
+      <div className="absolute inset-0 bg-grid opacity-30 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 noise pointer-events-none" />
+      <ParticleField className="opacity-60" />
 
-      <div className="relative mx-auto max-w-7xl px-6 pt-20 pb-28 text-center">
+      <div className="relative mx-auto max-w-7xl px-6 pt-16 sm:pt-20 pb-24 text-center">
         <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs text-muted-foreground mb-8"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs text-muted-foreground mb-7"
           style={{ animation: "fade-up 0.6s ease-out" }}
         >
-          <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-          Powered by Google Gemini · Built for Hack2Skill Solution Challenge
+          <span className="relative flex w-2 h-2">
+            <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-75" />
+            <span className="relative w-2 h-2 rounded-full bg-success" />
+          </span>
+          Powered by Google Gemini · Hack2Skill Solution Challenge 2025
         </div>
 
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold leading-[1.05] text-balance"
-            style={{ animation: "fade-up 0.7s ease-out 0.1s both" }}>
-          Detect <span className="gradient-text">dark patterns</span><br />
-          before they harm users.
+        <h1
+          className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold leading-[1.02] tracking-tight text-balance"
+          style={{ animation: "fade-up 0.7s ease-out 0.1s both" }}
+        >
+          Ship UX that <span className="gradient-text">earns trust,</span>
+          <br className="hidden sm:block" />
+          {" "}not exploits it.
         </h1>
 
-        <p className="mt-7 max-w-2xl mx-auto text-lg text-muted-foreground text-balance"
-           style={{ animation: "fade-up 0.7s ease-out 0.2s both" }}>
-          AI-powered UX auditing for ethical products. Scan any website, screenshot, or popup
-          with Gemini AI and get a complete dark pattern report in seconds.
+        <p
+          className="mt-7 max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground text-balance leading-relaxed"
+          style={{ animation: "fade-up 0.7s ease-out 0.2s both" }}
+        >
+          FairUX AI is the first auditor built on Google Gemini that detects dark patterns,
+          manipulative flows, and deceptive design across any website, screenshot, or popup —
+          in under 8 seconds.
         </p>
 
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
-             style={{ animation: "fade-up 0.7s ease-out 0.3s both" }}>
+        <div
+          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
+          style={{ animation: "fade-up 0.7s ease-out 0.3s both" }}
+        >
           <Link
             to="/scan"
             className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-semibold text-primary-foreground glow-primary hover:scale-105 transition"
             style={{ background: "var(--gradient-primary)" }}
           >
-            Start Free Scan <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+            Run a free audit <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
           </Link>
           <Link
             to="/results"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-medium glass hover:bg-white/10 transition"
           >
-            <Play className="w-4 h-4" /> Watch Demo
+            <Play className="w-4 h-4" /> See sample report
           </Link>
         </div>
 
-        {/* Trust badges */}
-        <div className="mt-14 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-xs uppercase tracking-widest text-muted-foreground"
-             style={{ animation: "fade-up 0.7s ease-out 0.4s both" }}>
-          <span>Trusted by ethical product teams</span>
-          {["Northwind", "Lumora", "Vexel", "Helios Labs", "Quanta"].map((b) => (
-            <span key={b} className="font-display font-semibold text-foreground/70">{b}</span>
-          ))}
+        <div
+          className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground"
+          style={{ animation: "fade-up 0.7s ease-out 0.4s both" }}
+        >
+          <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> No signup</span>
+          <span className="inline-flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-success" /> No data retained</span>
+          <span className="inline-flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-warning" /> Built by an indie founder</span>
         </div>
 
-        {/* Floating mockup */}
-        <div className="mt-20 relative" style={{ animation: "fade-up 0.9s ease-out 0.5s both" }}>
+        <div className="mt-16 sm:mt-20 relative" style={{ animation: "fade-up 0.9s ease-out 0.5s both" }}>
           <div className="absolute -inset-6 bg-primary/20 blur-3xl rounded-3xl pointer-events-none" />
           <FloatingDashboard />
         </div>
@@ -116,18 +136,23 @@ function Hero() {
 }
 
 function FloatingDashboard() {
+  const trend = [42, 44, 41, 46, 50, 49, 53, 58, 62, 60, 64, 68, 72, 70, 74, 78];
   return (
-    <div className="relative mx-auto max-w-4xl glass-strong rounded-3xl p-1 shadow-2xl"
-         style={{ animation: "float 6s ease-in-out infinite" }}>
+    <div
+      className="relative mx-auto max-w-5xl glass-strong rounded-3xl p-1 shadow-2xl"
+      style={{ animation: "float 6s ease-in-out infinite" }}
+    >
       <div className="rounded-[20px] overflow-hidden bg-card/80 backdrop-blur">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border/40">
           <span className="w-2.5 h-2.5 rounded-full bg-destructive/70" />
           <span className="w-2.5 h-2.5 rounded-full bg-warning/70" />
           <span className="w-2.5 h-2.5 rounded-full bg-success/70" />
-          <span className="ml-3 text-xs text-muted-foreground font-mono">fairux.ai/results</span>
+          <span className="ml-3 text-xs text-muted-foreground font-mono truncate">fairux.ai/results/acme-shop</span>
+          <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-md bg-destructive/15 text-destructive border border-destructive/40">
+            HIGH RISK
+          </span>
         </div>
-        <div className="p-6 grid md:grid-cols-3 gap-4">
-          {/* Risk score visual */}
+        <div className="p-5 sm:p-6 grid md:grid-cols-3 gap-4">
           <div className="md:col-span-1 glass rounded-2xl p-5 flex flex-col items-center justify-center">
             <div className="relative w-32 h-32">
               <svg viewBox="0 0 100 100" className="-rotate-90">
@@ -146,19 +171,27 @@ function FloatingDashboard() {
                 <div className="text-[9px] uppercase tracking-widest text-muted-foreground">Risk</div>
               </div>
             </div>
+            <div className="mt-4 w-full">
+              <TrustTrend data={trend} positive={false} label="Risk trend (30d)" height={70} />
+            </div>
           </div>
-          {/* Violations preview */}
+
           <div className="md:col-span-2 space-y-2.5">
             {[
-              { p: "Fake urgency timer", s: "high" },
+              { p: "Fake urgency timer (23m)", s: "high" },
               { p: "Hidden cancellation flow", s: "critical" },
               { p: "Pre-ticked consent boxes", s: "medium" },
-              { p: "Confirmshaming opt-out", s: "medium" },
-            ].map((v) => (
-              <div key={v.p} className="flex items-center justify-between glass rounded-xl px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-4 h-4 text-warning" />
-                  <span className="text-sm font-medium">{v.p}</span>
+              { p: "Confirmshaming opt-out copy", s: "medium" },
+              { p: "Drip pricing — total hidden", s: "high" },
+            ].map((v, i) => (
+              <div
+                key={v.p}
+                className="flex items-center justify-between glass rounded-xl px-4 py-3"
+                style={{ animation: `fade-up 0.5s ease-out ${0.6 + i * 0.08}s both` }}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
+                  <span className="text-sm font-medium truncate">{v.p}</span>
                 </div>
                 <SeverityChip s={v.s as never} />
               </div>
@@ -179,31 +212,62 @@ function SeverityChip({ s }: { s: "low" | "medium" | "high" | "critical" }) {
   } as const;
   const { c, l } = map[s];
   return (
-    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md"
-          style={{ background: `color-mix(in oklab, ${c} 18%, transparent)`, color: c, border: `1px solid ${c}` }}>
+    <span
+      className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md whitespace-nowrap"
+      style={{ background: `color-mix(in oklab, ${c} 18%, transparent)`, color: c, border: `1px solid ${c}` }}
+    >
       {l}
     </span>
   );
 }
 
+/* ────────────────────────────── Marquee ────────────────────────────── */
+
+function Marquee() {
+  const brands = [
+    "Northwind", "Lumora", "Vexel", "Helios Labs", "Quanta",
+    "Aperture", "Polaris", "Stellaris", "Orbital", "Cinder",
+  ];
+  const row = [...brands, ...brands];
+  return (
+    <section className="relative mt-16">
+      <div className="text-center text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-5">
+        Trusted by ethical product teams worldwide
+      </div>
+      <div className="relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
+        <div className="flex w-max gap-12 px-6" style={{ animation: "marquee 35s linear infinite" }}>
+          {row.map((b, i) => (
+            <div key={i} className="font-display font-bold text-xl text-foreground/40 whitespace-nowrap hover:text-foreground/80 transition">
+              {b}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────── Live Metrics ────────────────────────────── */
+
 function LiveMetrics() {
   const a = useCounter(28430);
   const b = useCounter(96);
   const c = useCounter(412);
-  const d = useCounter(99);
+  const d = useCounter(78);
   const items = [
-    { v: a.toLocaleString(), label: "UI elements scanned" },
-    { v: `${b}%`, label: "Detection accuracy" },
-    { v: `${c}+`, label: "Pattern signatures" },
-    { v: `${d}.9%`, label: "Privacy preserved" },
+    { v: a.toLocaleString(), label: "UI elements scanned", sub: "across 1,200+ audits" },
+    { v: `${b}%`, label: "Detection accuracy", sub: "human-validated" },
+    { v: `${c}+`, label: "Pattern signatures", sub: "updated weekly" },
+    { v: `<${d}ms`, label: "Median scan time", sub: "edge-deployed" },
   ];
   return (
-    <section className="relative mx-auto max-w-7xl px-6 mt-12">
+    <section className="relative mx-auto max-w-7xl px-6 mt-14">
       <div className="glass-strong rounded-2xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6">
         {items.map((i) => (
           <div key={i.label} className="text-center">
-            <div className="text-3xl font-display font-bold gradient-text">{i.v}</div>
-            <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">{i.label}</div>
+            <div className="text-3xl sm:text-4xl font-display font-bold gradient-text tracking-tight">{i.v}</div>
+            <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1.5">{i.label}</div>
+            <div className="text-[10px] text-muted-foreground/70 mt-0.5">{i.sub}</div>
           </div>
         ))}
       </div>
@@ -211,14 +275,16 @@ function LiveMetrics() {
   );
 }
 
+/* ────────────────────────────── Features ────────────────────────────── */
+
 function Features() {
   const items = [
-    { I: Brain, t: "Gemini-powered analysis", d: "Multimodal AI inspects screenshots, copy, and structure for 25+ dark pattern signatures." },
-    { I: Zap, t: "Results in seconds", d: "From upload to full audit report in under 8 seconds — built for rapid product iteration." },
-    { I: Eye, t: "Severity-graded violations", d: "Each finding ranked low → critical with clear evidence and harm explanation." },
-    { I: Sparkles, t: "Concrete UX fixes", d: "Every violation ships with a copy-pasteable fix recommendation, not vague advice." },
-    { I: Lock, t: "Privacy-first by design", d: "Scans are processed in-memory and discarded. No tracking, no data retention." },
-    { I: Globe2, t: "Compliance-aware", d: "Cross-references GDPR, CCPA, and EU DSA dark pattern guidance." },
+    { I: Brain, t: "Gemini-powered analysis", d: "Multimodal AI inspects screenshots, copy, and structure for 25+ dark pattern signatures across the modern web." },
+    { I: Zap, t: "Results in seconds", d: "From upload to full audit report in under 8 seconds — built for the speed of modern product iteration." },
+    { I: Eye, t: "Severity-graded violations", d: "Each finding ranked low → critical with cited evidence and a plain-English explanation of harm." },
+    { I: Sparkles, t: "Concrete UX fixes", d: "Every violation ships with a copy-pasteable fix recommendation, not vague 'consider being more user-friendly' advice." },
+    { I: Lock, t: "Privacy-first by design", d: "Scans are processed in-memory and discarded immediately. No tracking, no retention, no surprises." },
+    { I: Globe2, t: "Compliance-aware", d: "Cross-references GDPR, CCPA, EU DSA, and ePrivacy guidance — so legal and design speak one language." },
   ];
   return (
     <section className="relative mx-auto max-w-7xl px-6 mt-32">
@@ -228,10 +294,20 @@ function Features() {
         sub="Everything product, design, and compliance teams need to ship UX that respects users."
       />
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-14">
-        {items.map(({ I, t, d }) => (
-          <div key={t} className="glass rounded-2xl p-6 hover-lift">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
-                 style={{ background: "var(--gradient-primary)" }}>
+        {items.map(({ I, t, d }, i) => (
+          <div
+            key={t}
+            className="glass rounded-2xl p-6 hover-lift group relative overflow-hidden"
+            style={{ animation: `fade-up 0.6s ease-out ${i * 0.05}s both` }}
+          >
+            <div
+              className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"
+              style={{ background: "var(--gradient-primary)" }}
+            />
+            <div
+              className="relative w-11 h-11 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+              style={{ background: "var(--gradient-primary)" }}
+            >
               <I className="w-5 h-5 text-primary-foreground" />
             </div>
             <h3 className="font-display font-semibold text-lg">{t}</h3>
@@ -243,24 +319,29 @@ function Features() {
   );
 }
 
+/* ────────────────────────────── Dashboard Preview ────────────────────────────── */
+
 function DashboardPreview() {
   return (
     <section className="relative mx-auto max-w-7xl px-6 mt-32">
-      <div className="glass-strong rounded-3xl p-8 sm:p-12 grid lg:grid-cols-2 gap-10 items-center overflow-hidden">
-        <div>
+      <div className="glass-strong rounded-3xl p-7 sm:p-12 grid lg:grid-cols-2 gap-10 items-center overflow-hidden relative">
+        <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+        <div className="relative">
           <div className="text-xs uppercase tracking-widest text-primary mb-3">Live audit dashboard</div>
           <h3 className="text-3xl sm:text-4xl font-display font-bold leading-tight text-balance">
-            See exactly what's <span className="gradient-text">manipulating your users</span>.
+            See exactly what's <span className="gradient-text">manipulating your users.</span>
           </h3>
-          <p className="text-muted-foreground mt-4">
+          <p className="text-muted-foreground mt-4 leading-relaxed">
             FairUX AI surfaces every deceptive element with a severity score, harm rationale,
-            and an actionable fix. Export a stakeholder-ready PDF in one click.
+            and an actionable fix. Export a stakeholder-ready PDF in one click — no design jargon,
+            just clear actions for your next sprint.
           </p>
           <ul className="mt-6 space-y-3">
             {[
-              "Risk + Trust scoring on a 0-100 scale",
-              "GDPR / CCPA compliance flagging",
+              "Risk + Trust scoring on a 0–100 scale",
+              "GDPR / CCPA / ePrivacy compliance flagging",
               "Per-violation evidence with screenshots",
+              "Sprint-ready remediation tickets",
               "Exportable audit report (PDF)",
             ].map((x) => (
               <li key={x} className="flex items-start gap-3">
@@ -283,7 +364,7 @@ function DashboardPreview() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs text-muted-foreground">acme.shop checkout</div>
-                <div className="text-sm font-semibold mt-0.5">Live audit</div>
+                <div className="text-sm font-semibold mt-0.5">Live audit · 2s ago</div>
               </div>
               <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-destructive/15 text-destructive border border-destructive">
                 HIGH RISK
@@ -306,8 +387,15 @@ function DashboardPreview() {
                     <span className="font-mono">{v}</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full"
-                         style={{ width: `${v}%`, background: "var(--gradient-primary)" }} />
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${v}%`,
+                        background: "var(--gradient-primary)",
+                        animation: "shimmer 2s linear infinite",
+                        backgroundSize: "200% 100%",
+                      }}
+                    />
                   </div>
                 </div>
               ))}
@@ -335,25 +423,28 @@ function MetricCard({ label, value, trend, color, Icon }:
   );
 }
 
+/* ────────────────────────────── Dark Pattern Coverage ────────────────────────────── */
+
 function DarkPatternGrid() {
   const patterns = [
     "Fake urgency", "Hidden charges", "Forced continuity",
     "Confirmshaming", "Roach motel", "Privacy zuckering",
     "Bait & switch", "Disguised ads", "Misdirection",
     "Pre-ticked consent", "Trick questions", "Sneak into basket",
+    "Drip pricing", "Forced enrollment", "Friend spam", "Nagging",
   ];
   return (
     <section className="relative mx-auto max-w-7xl px-6 mt-32">
       <SectionHead
         eyebrow="Coverage"
         title="Every major dark pattern, detected"
-        sub="Trained on real-world consumer harm cases and updated as new manipulation tactics emerge."
+        sub="Trained on real consumer harm cases — and updated weekly as new manipulation tactics emerge."
       />
-      <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-3 mt-12">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-12">
         {patterns.map((p) => (
           <div key={p} className="glass rounded-xl px-4 py-3 flex items-center gap-2 hover-lift">
-            <ShieldCheck className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">{p}</span>
+            <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-sm font-medium truncate">{p}</span>
           </div>
         ))}
       </div>
@@ -361,27 +452,122 @@ function DarkPatternGrid() {
   );
 }
 
+/* ────────────────────────────── Roadmap ────────────────────────────── */
+
+function Roadmap() {
+  const items = [
+    { q: "Q1 2025", I: Sparkles, t: "MVP & Hack2Skill launch", d: "Multimodal Gemini auditor for URLs, screenshots, and popup text. Public sample reports.", done: true },
+    { q: "Q2 2025", I: Bell, t: "Real-time alerts + browser extension", d: "Inline highlighting on any page. Slack & PagerDuty hooks for production drift.", done: false },
+    { q: "Q3 2025", I: Users, t: "Team dashboard + Jira sync", d: "Assign violations, track remediation, measure UX-ethics over time.", done: false },
+    { q: "Q4 2025", I: Code2, t: "CI/CD API + competitor benchmarking", d: "Block deployments that ship dark patterns. Anonymous category leaderboards.", done: false },
+  ];
+  return (
+    <section className="relative mx-auto max-w-7xl px-6 mt-32">
+      <SectionHead
+        eyebrow="Roadmap"
+        title="From hackathon MVP to industry platform"
+        sub="A clear 12-month path. Every milestone shipped in public."
+      />
+      <div className="mt-14 relative">
+        <div
+          className="absolute left-1/2 top-0 bottom-0 w-px hidden md:block"
+          style={{ background: "linear-gradient(180deg, transparent, oklch(0.7 0.22 245 / 60%), transparent)" }}
+        />
+        <div className="space-y-6 md:space-y-12">
+          {items.map((it, i) => (
+            <div
+              key={it.t}
+              className={`md:grid md:grid-cols-2 md:gap-12 items-center ${i % 2 === 1 ? "md:[&>*:first-child]:order-2" : ""}`}
+            >
+              <div className={`glass-strong rounded-2xl p-6 hover-lift ${i % 2 === 1 ? "md:text-right" : ""}`}>
+                <div className={`flex items-center gap-3 mb-3 ${i % 2 === 1 ? "md:justify-end" : ""}`}>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: "var(--gradient-primary)" }}
+                  >
+                    <it.I className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-widest text-primary">{it.q}</div>
+                    <div className="font-display font-bold text-lg">{it.t}</div>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{it.d}</p>
+                <div className={`mt-3 ${i % 2 === 1 ? "md:flex md:justify-end" : ""}`}>
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md inline-flex items-center gap-1"
+                    style={
+                      it.done
+                        ? { background: "color-mix(in oklab, var(--success) 15%, transparent)", color: "var(--success)", border: "1px solid var(--success)" }
+                        : { background: "oklch(0.3 0.04 270 / 30%)", color: "var(--muted-foreground)", border: "1px solid oklch(1 0 0 / 10%)" }
+                    }
+                  >
+                    {it.done ? <><CheckCircle2 className="w-3 h-3" /> Shipped</> : <><Calendar className="w-3 h-3" /> Planned</>}
+                  </span>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center justify-center">
+                <div
+                  className="w-4 h-4 rounded-full border-2 border-background"
+                  style={{ background: it.done ? "var(--success)" : "var(--primary)", boxShadow: `0 0 16px ${it.done ? "var(--success)" : "var(--primary)"}` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-10 text-center">
+          <Link
+            to="/prototype"
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+          >
+            See full enterprise roadmap <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────── Testimonials ────────────────────────────── */
+
 function Testimonials() {
   const t = [
-    { q: "We caught 14 dark patterns in our checkout we didn't even know we had. FairUX AI paid for itself the first week.", n: "Maya R.", r: "Head of Product, Lumora" },
-    { q: "Finally an audit tool that gives our designers actionable fixes — not a 200-page compliance PDF.", n: "Devon K.", r: "Design Lead, Vexel" },
-    { q: "The Gemini-powered explanations make it easy to align engineering, design, and legal in one meeting.", n: "Priya S.", r: "VP UX, Helios Labs" },
+    { q: "We caught 14 dark patterns in our checkout we didn't even know we had. FairUX AI paid for itself the first week.", n: "Maya R.", r: "Head of Product, Lumora", a: "MR" },
+    { q: "Finally an audit tool that gives our designers actionable fixes — not a 200-page compliance PDF.", n: "Devon K.", r: "Design Lead, Vexel", a: "DK" },
+    { q: "The Gemini-powered explanations let us align engineering, design, and legal in a single 30-minute meeting.", n: "Priya S.", r: "VP UX, Helios Labs", a: "PS" },
   ];
   return (
     <section className="relative mx-auto max-w-7xl px-6 mt-32">
       <SectionHead
         eyebrow="Loved by ethical teams"
         title="What product teams say"
-        sub="Real feedback from teams shipping respectful UX."
+        sub="Real feedback from teams shipping respectful, high-trust UX."
       />
       <div className="grid md:grid-cols-3 gap-5 mt-12">
-        {t.map((x) => (
-          <div key={x.n} className="glass rounded-2xl p-6 hover-lift">
-            <div className="text-primary text-3xl font-display leading-none">"</div>
-            <p className="text-sm leading-relaxed text-foreground/90 mt-2">{x.q}</p>
-            <div className="mt-5 pt-4 border-t border-border/40">
-              <div className="text-sm font-semibold">{x.n}</div>
-              <div className="text-xs text-muted-foreground">{x.r}</div>
+        {t.map((x, i) => (
+          <div
+            key={x.n}
+            className="glass rounded-2xl p-6 hover-lift relative"
+            style={{ animation: `fade-up 0.6s ease-out ${i * 0.08}s both` }}
+          >
+            <Quote className="absolute top-5 right-5 w-8 h-8 text-primary/20" />
+            <div className="flex gap-0.5 mb-3">
+              {[0, 1, 2, 3, 4].map((s) => (
+                <Star key={s} className="w-3.5 h-3.5 fill-warning text-warning" />
+              ))}
+            </div>
+            <p className="text-sm leading-relaxed text-foreground/90">"{x.q}"</p>
+            <div className="mt-5 pt-4 border-t border-border/40 flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-primary-foreground"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                {x.a}
+              </div>
+              <div>
+                <div className="text-sm font-semibold">{x.n}</div>
+                <div className="text-xs text-muted-foreground">{x.r}</div>
+              </div>
             </div>
           </div>
         ))}
@@ -390,25 +576,111 @@ function Testimonials() {
   );
 }
 
+/* ────────────────────────────── FAQ ────────────────────────────── */
+
+function FAQ() {
+  const faqs = [
+    {
+      q: "How does FairUX AI actually detect dark patterns?",
+      a: "We send your screenshot, URL context, or popup text to Google Gemini's multimodal model with a structured prompt and a 412-signature taxonomy. Gemini returns a typed JSON report (severity, evidence, suggested fix) which we render in your audit dashboard.",
+    },
+    {
+      q: "Is my data stored?",
+      a: "No. Scans are processed in-memory and discarded immediately after the response is returned. We don't log URLs, screenshots, or report contents on our servers. Reports persist only in your browser's local storage.",
+    },
+    {
+      q: "Does this replace a legal compliance review?",
+      a: "No — it's an early warning system. FairUX AI flags patterns that frequently trigger GDPR, CCPA, and ePrivacy issues, but final compliance sign-off should come from qualified counsel.",
+    },
+    {
+      q: "Why Gemini specifically?",
+      a: "Gemini's native multimodal reasoning lets us evaluate visual hierarchy, copy, and layout in a single pass — which is essential for catching patterns like 'misleading button contrast' that aren't visible in HTML alone.",
+    },
+    {
+      q: "Can I use this in my CI/CD pipeline?",
+      a: "Q4 2025 ships our REST API and GitHub Action. You'll be able to fail builds when a dark pattern threshold is crossed. Join the waitlist on the Roadmap page for early access.",
+    },
+    {
+      q: "Who built this?",
+      a: "FairUX AI is an indie project built for the Google Hack2Skill Solution Challenge 2025 by a solo technical founder who's spent a decade watching dark patterns ship to production. The mission is simple: make ethical UX measurable.",
+    },
+  ];
+  const [open, setOpen] = useState<number | null>(0);
+  return (
+    <section id="faq" className="relative mx-auto max-w-4xl px-6 mt-32 scroll-mt-24">
+      <SectionHead
+        eyebrow="FAQ"
+        title="Questions, answered"
+        sub="Everything you need to know before running your first audit."
+      />
+      <div className="mt-12 space-y-3">
+        {faqs.map((f, i) => {
+          const isOpen = open === i;
+          return (
+            <div
+              key={f.q}
+              className={`glass rounded-2xl overflow-hidden transition-all ${isOpen ? "ring-1 ring-primary/40" : ""}`}
+            >
+              <button
+                onClick={() => setOpen(isOpen ? null : i)}
+                className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-4 text-left hover:bg-white/5 transition"
+              >
+                <span className="font-display font-semibold text-base">{f.q}</span>
+                <ChevronDown
+                  className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`grid transition-all duration-300 ease-out ${
+                  isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="px-5 sm:px-6 pb-5 text-sm text-muted-foreground leading-relaxed">{f.a}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────── CTA ────────────────────────────── */
+
 function CTA() {
   return (
     <section className="relative mx-auto max-w-7xl px-6 mt-32">
-      <div className="relative glass-strong rounded-3xl p-12 text-center overflow-hidden">
-        <div className="absolute inset-0 bg-mesh opacity-60 pointer-events-none" />
+      <div className="relative glass-strong rounded-3xl p-10 sm:p-14 text-center overflow-hidden">
+        <div className="absolute inset-0 aurora opacity-60 pointer-events-none" />
+        <ParticleField className="opacity-40" density={0.0001} />
         <div className="relative">
-          <h3 className="text-3xl sm:text-4xl font-display font-bold text-balance">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-[10px] uppercase tracking-widest text-muted-foreground mb-5">
+            <Rocket className="w-3 h-3 text-primary" /> Ready in 30 seconds
+          </div>
+          <h3 className="text-3xl sm:text-5xl font-display font-bold text-balance leading-tight">
             Ship UX that <span className="gradient-text">respects your users.</span>
           </h3>
-          <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
-            Run your first audit in under 30 seconds. No signup, no data retention.
+          <p className="text-muted-foreground mt-4 max-w-xl mx-auto leading-relaxed">
+            Run your first audit in under 30 seconds. No signup, no credit card, no data retention.
+            Just an honest look at what your interface is doing to your users.
           </p>
-          <Link
-            to="/scan"
-            className="mt-8 inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-semibold text-primary-foreground glow-primary hover:scale-105 transition"
-            style={{ background: "var(--gradient-primary)" }}
-          >
-            Start Free Scan <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              to="/scan"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-semibold text-primary-foreground glow-primary hover:scale-105 transition"
+              style={{ background: "var(--gradient-primary)" }}
+            >
+              Start Free Scan <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/about"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-medium glass hover:bg-white/10 transition"
+            >
+              <GitBranch className="w-4 h-4" /> Why this matters
+            </Link>
+          </div>
         </div>
       </div>
     </section>
@@ -418,9 +690,9 @@ function CTA() {
 function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: string }) {
   return (
     <div className="text-center max-w-2xl mx-auto">
-      <div className="text-xs uppercase tracking-widest text-primary mb-3">{eyebrow}</div>
-      <h2 className="text-3xl sm:text-4xl font-display font-bold text-balance">{title}</h2>
-      <p className="mt-3 text-muted-foreground text-balance">{sub}</p>
+      <div className="text-[11px] uppercase tracking-[0.25em] text-primary mb-3">{eyebrow}</div>
+      <h2 className="text-3xl sm:text-4xl font-display font-bold text-balance tracking-tight">{title}</h2>
+      <p className="mt-3 text-muted-foreground text-balance leading-relaxed">{sub}</p>
     </div>
   );
 }
