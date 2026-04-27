@@ -17,8 +17,10 @@ for the following categories of dark patterns:
 - Privacy zuckering
 - Misdirection
 
-Be precise, evidence-based, and constructive. Always return ALL fields. Never invent specific
-quotes — describe patterns observed.`;
+Be precise, evidence-based, and constructive. Always return ALL fields via the report_audit
+function. Reference relevant regulations (GDPR, ePrivacy, FTC Act §5, EU Digital Services Act,
+California ROSCA, India DPDPA) in legalWarning when applicable. Never invent specific quotes —
+describe patterns observed.`;
 
 const TOOL = {
   type: "function" as const,
@@ -34,11 +36,23 @@ const TOOL = {
         },
         trustScore: {
           type: "number",
-          description: "0-100. Higher = more trustworthy. Should roughly inversely correlate with riskScore.",
+          description: "0-100. Higher = more trustworthy. Roughly inverse of riskScore.",
         },
         compliance: {
           type: "string",
           enum: ["safe", "warning", "high_risk"],
+          description: "Overall compliance status.",
+        },
+        severityLevel: {
+          type: "string",
+          enum: ["low", "medium", "high", "critical"],
+          description: "The single highest severity level present in the audit.",
+        },
+        legalWarning: {
+          type: "string",
+          description:
+            "Plain-language warning citing the most relevant regulation(s) violated, e.g. " +
+            "'Pre-ticked consent boxes violate GDPR Art. 7 and ePrivacy Directive.'",
         },
         summary: {
           type: "string",
@@ -46,6 +60,7 @@ const TOOL = {
         },
         violations: {
           type: "array",
+          description: "Each detected dark pattern.",
           items: {
             type: "object",
             properties: {
@@ -65,121 +80,141 @@ const TOOL = {
           description: "3-6 high-level UX improvement recommendations.",
         },
       },
-      required: ["riskScore", "trustScore", "compliance", "summary", "violations", "recommendations"],
+      required: [
+        "riskScore",
+        "trustScore",
+        "compliance",
+        "severityLevel",
+        "legalWarning",
+        "summary",
+        "violations",
+        "recommendations",
+      ],
       additionalProperties: false,
     },
   },
 };
 
-function mockReport(reason: string) {
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+function deriveExtras(parsed: {
+  riskScore?: number;
+  violations?: Array<{ severity?: string }>;
+  legalWarning?: string;
+  severityLevel?: string;
+}) {
+  const order = ["low", "medium", "high", "critical"] as const;
+  const maxSeverity =
+    parsed.violations?.reduce<(typeof order)[number]>((acc, v) => {
+      const s = (v.severity ?? "low") as (typeof order)[number];
+      return order.indexOf(s) > order.indexOf(acc) ? s : acc;
+    }, "low") ?? "low";
+
   return {
-    riskScore: 78,
-    trustScore: 32,
-    compliance: "high_risk" as const,
-    summary:
-      "Multiple high-severity dark patterns detected. The interface uses urgency manipulation, " +
-      "misleading visual hierarchy, and obscured cancellation flows that erode user trust. " +
-      `(Demo data — ${reason})`,
-    violations: [
-      {
-        pattern: "Fake urgency countdown",
-        severity: "high",
-        description: "A countdown timer pressures users to act within minutes without verifiable basis.",
-        why_harmful: "Creates anxiety-driven decisions and bypasses rational evaluation, harming user autonomy.",
-        fix: "Remove arbitrary timers. Only show real, verifiable deadlines tied to inventory or pricing windows.",
-      },
-      {
-        pattern: "Misleading primary button",
-        severity: "high",
-        description: "The 'Continue with subscription' CTA is visually dominant while 'No thanks' is greyed out.",
-        why_harmful: "Visual hierarchy steers users into the option that benefits the business, not them.",
-        fix: "Give both options equal visual weight. Treat decline as a first-class choice.",
-      },
-      {
-        pattern: "Hidden cancellation",
-        severity: "critical",
-        description: "Cancellation requires 4+ clicks through unrelated upsell screens.",
-        why_harmful: "Roach motel pattern — easy to enter, hard to leave. Often illegal under EU/CA consumer law.",
-        fix: "Place cancel one click from account settings. No upsell interstitials.",
-      },
-      {
-        pattern: "Forced cookie consent",
-        severity: "medium",
-        description: "Pre-ticked non-essential cookies with a styled 'Accept All' and a buried 'Reject'.",
-        why_harmful: "Violates GDPR/ePrivacy informed consent requirements.",
-        fix: "Equal-weight Accept/Reject buttons. No pre-ticked boxes.",
-      },
-      {
-        pattern: "Confirmshaming opt-out",
-        severity: "medium",
-        description: "Decline label reads 'No, I don't care about saving money.'",
-        why_harmful: "Uses guilt to manipulate user choice.",
-        fix: "Use neutral language: 'Decline' or 'No thanks'.",
-      },
-    ],
-    recommendations: [
-      "Audit every CTA pair for equal visual weight.",
-      "Make the cancel/decline path one click from account settings.",
-      "Replace urgency timers with real, evidence-based deadlines.",
-      "Move to a single-click reject for non-essential cookies.",
-      "Run plain-language reviews on all opt-out copy.",
-      "Surface total price (incl. taxes/shipping) before checkout.",
-    ],
-    scannedAt: new Date().toISOString(),
+    severityLevel: parsed.severityLevel ?? maxSeverity,
+    legalWarning:
+      parsed.legalWarning ??
+      "Patterns detected may violate consumer protection rules under the FTC Act §5, EU Digital Services Act, and GDPR/ePrivacy when applied to EU users.",
   };
 }
 
 export const Route = createFileRoute("/api/analyze")({
   server: {
     handlers: {
+      // Health check — confirms the route is reachable
+      GET: async () => {
+        return jsonResponse({
+          ok: true,
+          service: "FairUX AI Analyzer",
+          model: "google/gemini-2.5-flash",
+          accepts: ["url", "text", "image"],
+          method: "POST",
+        });
+      },
+
       POST: async ({ request }) => {
+        let body: { url?: string; text?: string; image?: string };
         try {
-          const body = (await request.json()) as {
-            url?: string;
-            text?: string;
-            image?: string; // data URL
-          };
+          body = (await request.json()) as typeof body;
+        } catch {
+          return jsonResponse({ error: "Invalid JSON body." }, 400);
+        }
 
-          const apiKey = process.env.LOVABLE_API_KEY;
+        const apiKey = process.env.LOVABLE_API_KEY;
+        if (!apiKey) {
+          return jsonResponse(
+            {
+              error:
+                "AI service is not configured. The LOVABLE_API_KEY secret is missing on the server.",
+            },
+            500,
+          );
+        }
 
-          // Build the user message
-          const parts: Array<{ type: string; text?: string; image_url?: { url: string } }> = [];
-          let sourceLabel = "";
+        const parts: Array<{ type: string; text?: string; image_url?: { url: string } }> = [];
+        let sourceLabel = "";
 
-          if (body.image) {
-            parts.push({
-              type: "text",
-              text: "Audit this UI screenshot for dark patterns. Return a complete report via the report_audit function.",
-            });
-            parts.push({ type: "image_url", image_url: { url: body.image } });
-            sourceLabel = "screenshot";
-          } else if (body.url) {
-            parts.push({
-              type: "text",
-              text: `Audit the website at ${body.url} based on common dark patterns found on similar products. Be specific about likely violations and produce a complete report via the report_audit function.`,
-            });
-            sourceLabel = body.url;
-          } else if (body.text) {
-            parts.push({
-              type: "text",
-              text: `Audit the following UI copy / popup text for dark patterns. Produce a complete report via the report_audit function.\n\n---\n${body.text}\n---`,
-            });
-            sourceLabel = "popup text";
-          } else {
-            return new Response(JSON.stringify({ error: "Provide url, text, or image." }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
-          }
-
-          if (!apiKey) {
-            return new Response(
-              JSON.stringify({ ...mockReport("AI key not configured"), sourceLabel }),
-              { headers: { "Content-Type": "application/json" } },
+        if (body.image) {
+          if (!body.image.startsWith("data:image/")) {
+            return jsonResponse(
+              { error: "Image must be a data URL (data:image/...;base64,...)." },
+              400,
             );
           }
+          parts.push({
+            type: "text",
+            text:
+              "Audit this UI screenshot for dark patterns. Be specific about what you observe — " +
+              "button hierarchy, copy tone, urgency cues, consent design, hidden options. " +
+              "Return a complete report via the report_audit function.",
+          });
+          parts.push({ type: "image_url", image_url: { url: body.image } });
+          sourceLabel = "screenshot";
+        } else if (body.url) {
+          const url = body.url.trim();
+          if (!/^https?:\/\//i.test(url)) {
+            return jsonResponse({ error: "URL must start with http:// or https://" }, 400);
+          }
+          parts.push({
+            type: "text",
+            text:
+              `Audit the website at ${url} for likely dark patterns based on what is typical for ` +
+              `products in this category. Be specific about probable violations on checkout, ` +
+              `consent, cancellation, and pricing flows. Return a complete report via the ` +
+              `report_audit function.`,
+          });
+          sourceLabel = url;
+        } else if (body.text) {
+          const text = body.text.trim();
+          if (text.length < 10) {
+            return jsonResponse({ error: "Provide at least 10 characters of text." }, 400);
+          }
+          parts.push({
+            type: "text",
+            text:
+              `Audit the following UI copy / popup text for dark patterns. Identify every ` +
+              `manipulative technique present. Produce a complete report via the report_audit ` +
+              `function.\n\n---\n${text}\n---`,
+          });
+          sourceLabel = "popup text";
+        } else {
+          return jsonResponse(
+            { error: "Provide one of: url, text, or image (data URL)." },
+            400,
+          );
+        }
 
-          const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        let res: Response;
+        try {
+          res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${apiKey}`,
@@ -195,61 +230,85 @@ export const Route = createFileRoute("/api/analyze")({
               tool_choice: { type: "function", function: { name: "report_audit" } },
             }),
           });
-
-          if (res.status === 429) {
-            return new Response(
-              JSON.stringify({ error: "Rate limit reached. Please try again in a moment." }),
-              { status: 429, headers: { "Content-Type": "application/json" } },
-            );
-          }
-          if (res.status === 402) {
-            return new Response(
-              JSON.stringify({ error: "AI credits exhausted. Add funds in workspace settings." }),
-              { status: 402, headers: { "Content-Type": "application/json" } },
-            );
-          }
-
-          if (!res.ok) {
-            const errText = await res.text();
-            console.error("Gateway error", res.status, errText);
-            return new Response(
-              JSON.stringify({ ...mockReport(`AI gateway returned ${res.status}`), sourceLabel }),
-              { headers: { "Content-Type": "application/json" } },
-            );
-          }
-
-          const data = await res.json() as {
-            choices?: Array<{
-              message?: {
-                tool_calls?: Array<{ function?: { arguments?: string } }>;
-              };
-            }>;
-          };
-
-          const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-          if (!args) {
-            return new Response(
-              JSON.stringify({ ...mockReport("AI returned no structured output"), sourceLabel }),
-              { headers: { "Content-Type": "application/json" } },
-            );
-          }
-
-          const parsed = JSON.parse(args);
-          return new Response(
-            JSON.stringify({
-              ...parsed,
-              scannedAt: new Date().toISOString(),
-              sourceLabel,
-            }),
-            { headers: { "Content-Type": "application/json" } },
-          );
         } catch (err) {
-          console.error("analyze error", err);
-          return new Response(
-            JSON.stringify({ ...mockReport("Unexpected server error"), sourceLabel: "fallback" }),
-            { headers: { "Content-Type": "application/json" } },
+          console.error("AI gateway network error", err);
+          return jsonResponse(
+            { error: "Could not reach AI service. Please try again." },
+            502,
           );
         }
+
+        if (res.status === 429) {
+          return jsonResponse(
+            { error: "Rate limit reached. Please wait a moment and try again." },
+            429,
+          );
+        }
+        if (res.status === 402) {
+          return jsonResponse(
+            {
+              error:
+                "AI credits exhausted. Add funds in Settings → Workspace → Usage to continue.",
+            },
+            402,
+          );
+        }
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          console.error("AI gateway error", res.status, errText);
+          return jsonResponse(
+            { error: `AI service returned ${res.status}. Please try again.` },
+            502,
+          );
+        }
+
+        let data: {
+          choices?: Array<{
+            message?: {
+              content?: string | null;
+              tool_calls?: Array<{ function?: { arguments?: string } }>;
+            };
+          }>;
+        };
+        try {
+          data = await res.json();
+        } catch (err) {
+          console.error("AI response was not JSON", err);
+          return jsonResponse({ error: "AI returned an invalid response." }, 502);
+        }
+
+        const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+        if (!args) {
+          console.error("No tool call in AI response", JSON.stringify(data).slice(0, 1000));
+          return jsonResponse(
+            { error: "AI did not return a structured audit. Please retry." },
+            502,
+          );
+        }
+
+        let parsed: Record<string, unknown>;
+        try {
+          parsed = JSON.parse(args);
+        } catch (err) {
+          console.error("Could not parse tool arguments", err, args.slice(0, 500));
+          return jsonResponse(
+            { error: "AI returned malformed audit data. Please retry." },
+            502,
+          );
+        }
+
+        const extras = deriveExtras(parsed as Parameters<typeof deriveExtras>[0]);
+
+        return jsonResponse({
+          ...parsed,
+          ...extras,
+          // Aliases for the frontend contract requested by the user
+          darkPatternsDetected: parsed.violations,
+          recommendedFixes: parsed.recommendations,
+          complianceStatus: parsed.compliance,
+          scannedAt: new Date().toISOString(),
+          sourceLabel,
+        });
       },
     },
   },
