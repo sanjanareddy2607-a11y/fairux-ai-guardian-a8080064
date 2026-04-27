@@ -108,12 +108,20 @@ function ScanPage() {
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok && res.status !== 200) {
-        const j = await res.json().catch(() => ({}));
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json")) {
+        throw new Error(
+          `Analyzer endpoint not reachable (HTTP ${res.status}). ` +
+            `If you just deployed, the build may still be propagating.`,
+        );
+      }
+
+      if (!res.ok) {
+        const j = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(j.error || `Scan failed (${res.status})`);
       }
 
