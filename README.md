@@ -37,12 +37,12 @@ The platform:
 
  **Key Features**
 
-- 🔍 Dark Pattern Detection (UI + content analysis)
-- 📊 Risk Scoring System
-- 🤖 AI-generated Compliance Reports (Gemini-powered)
-- ⚖️ Regulatory Mapping (EU AI Act, DPDP)
-- 🧪 Demo Mode for instant evaluation
-- 🎯 Clean and interactive dashboard
+-  Dark Pattern Detection (UI + content analysis)
+-  Risk Scoring System
+-  AI-generated Compliance Reports (Gemini-powered)
+-  Regulatory Mapping (EU AI Act, DPDP)
+-  Demo Mode for instant evaluation
+-  Clean and interactive dashboard
 
 ---
 **How It Works**
@@ -68,7 +68,7 @@ The platform:
  
 
 
-## 📦 Installation (Optional – for local setup)
+##  Installation (Optional – for local setup)
 
 ```bash
 git clone https://github.com/yourusername/fairux-ai-guardian.git
